@@ -1,6 +1,16 @@
 const express = require('express');
 const app = express();
-const port = 3000;
+const port =  process.env.PORT || 3000;
+
+// Підключення мідлварів
+const logRequests = require('./middlewares/logRequests');
+const basicAuth = require('./middlewares/basicAuth');
+const validateUserInput = require('./middlewares/validateUserInput');
+const checkArticleAccess = require('./middlewares/checkArticleAccess');
+
+// Використання мідлварів
+app.use(logRequests);
+app.use(express.json());
 
 // Маршрути
 const userRoutes = require('./routes/userRoutes');
@@ -11,9 +21,9 @@ app.get('/', (req, res) => {
   res.send('Get root route');
 });
 
-// Використання маршрутів
-app.use('/users', userRoutes);
-app.use('/articles', articleRoutes);
+// Використання маршрутів з мідлварами
+app.use('/users', basicAuth, userRoutes);
+app.use('/articles', checkArticleAccess, articleRoutes);
 
 // Запуск сервера
 app.listen(port, () => {
